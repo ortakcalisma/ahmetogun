@@ -66,40 +66,54 @@ ob_start();
 												//Connect();
 												global $Hata;
 												if (isset($_POST["gonderbutton"])){
-													$username = @mysql_real_escape_string(post("usertxt"));
-													$password = @mysql_real_escape_string(post("passtxt"));
-													echo $username;
-													echo $password;
+													$username = @mysql_real_escape_string($_POST("usertxt"));
+													$password = @mysql_real_escape_string($_POST("passtxt"));
+													
+													
+													$sql = "SELECT username, password FROM website WHERE username='{$username}' AND password='{$password}'";
+													$result = mysqli_query(Connect($baglan,$sql));
+													$row = mysqli_fetch_array($result,MYSQLI_ASSOC);
+      												$active = $row['active'];
+													$count = mysqli_num_rows($result);
+													if($count == 1) {
+														 session_register("username");
+														 $_SESSION['login_user'] = $username;
 
-													if ($username=="" || $password==""){
-														echo '<div class="alert alert-warning">Boş Alan Bırakmayınız !!</div>';
-
-													}
-													else{
-														$sor = Sor("SELECT username, password FROM website WHERE username='{$username}' AND password='{$password}'");
-														if(Say($sor)>0){		
-															$Yaz = Yaz($Sor);
-															$userS = sYap(array('user' => $Yaz["username"]));
-															$passS = sYap(array('pass' => $Yaz["password"]));
-															$oturum = sYap(array('' => md5($Yaz["password"].$_SERVER["REMOTE_ADDR"])));
-															if ($userS==true and $passS== true and $oturum==true){
-																echo '<div class="alert alert-success">Giriş Başarılı</div>';
-															}
-															else{
-																echo '<div class="alert alert-danger">Oturum Açılamadı !</div>';
-															}
-
-														}
-													else{
-															echo '<div class="alert alert-danger">Hatalı Bilgiler</div>';
-													}
-
-
-													}
+														 header("location: index.php");
+													  }else {
+														 $error = "Kullanıcı Adı veya Şifre Hatalı !!";
+													  }
 												}
+
+//													if ($username=="" || $password==""){
+//														echo '<div class="alert alert-warning">Boş Alan Bırakmayınız !!</div>';
+//
+//													}
+//													else{
+//														$sor = Sor("SELECT username, password FROM website WHERE username='{$username}' AND password='{$password}'");
+//														if(Say($sor)>0){		
+//															$Yaz = Yaz($Sor);
+//															$userS = sYap(array('user' => $Yaz["username"]));
+//															$passS = sYap(array('pass' => $Yaz["password"]));
+//															$oturum = sYap(array('' => md5($Yaz["password"].$_SERVER["REMOTE_ADDR"])));
+//															if ($userS==true and $passS== true and $oturum==true){
+//																echo '<div class="alert alert-success">Giriş Başarılı</div>';
+//															}
+//															else{
+//																echo '<div class="alert alert-danger">Oturum Açılamadı !</div>';
+//															}
+//
+//														}
+//													else{
+//															echo '<div class="alert alert-danger">Hatalı Bilgiler</div>';
+//													}
+
+
+//													}
+//												}
 											?>
 		
-											<form  method="POST">
+											<form method="POST">
 												<div class="form-group">
 													<label class="control-label mb-10" for="usertxt">Kullanıcı Adı</label>
 													<input type="text" class="form-control" name="usertxt" required="" id="usertxt" placeholder="Kullanıcı Adı Giriniz">
