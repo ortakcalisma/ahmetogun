@@ -1,58 +1,76 @@
 ﻿<?php
+    header('Content-Type: text/html; charset=utf-8');
+    
+    function Connect(){
+        $host = "localhost";
+        $user = "root";
+        $pass = "";
+        $data = "website";
+        $Con = @mysql_connect($host, $user, $pass);
+        if(!$Con){
+            die("Server Bağlantısı Yapılamadı !");
+        }
+        else{
+            $DB = @mysql_select_db($data, $Con);
+            if(!$DB){
+                die("Veritabanı Seçilemedi !");
+            }
+            else{
+                @mysql_query("SET CHARACTER  SET utf8");
+                @mysql_query("SET character_set_connection = 'UTF8' ");
+                @mysql_query("SET character_set_clients = 'UTF8' ");
+                @mysql_query("SET character_set_results = 'UTF8' ");
+            }
+            return $Con;
+        }
+    }
 
+    function DisConnect(){
+        if(!mysql_close(Connect())){
+            die("Bağlantı Kapatılamadı !");
+        }
+        else{
+            return true;
+        }
+    }
 
-function Connect(){
-	$host	= "localhost";
-	$veritabani	= "website";
-	$kullaniciadi	= "root";
-	$sifre	= "";
-
-
-	$baglan	= @mysql_connect($host, $kullaniciadi, $sifre);
-	if (!$baglan){
-		die("Bağlantı Hatası");	
-	}
-	else{
-		$DB	= @mysql_select_db($veritabani, $baglan);
-		if (!$DB){
-		die("Veritabanı Bağlantısı Hatası !!!");
-		}
-		else{
-		@mysql_query("GET CHARACTER SET utf8");
-		@mysql_query("SET character set connection = 'UTF8'");
-		@mysql_query("SET character set clients = 'UTF8'");
-		@mysql_query("SET character set results = 'UTF8'");
-		}
-		return $baglan;
-	}
-}
-function DisConnect(){
-	if(!mysql_close(Connect())){
-		die("Bağlantı Kapatılamadı !!!");
-	}
-	else{
-		return true;
-	}
-	
-}
-function Sor($sql){
-	global $hata;
-	if (isset($sql)){
-		if(Connect()){
-			$sonuc = mysql_query($sql);
-			$hata = @mysql_error();
-			return $sonuc;
-		}
-	}
-	
-}
-function Say($par){
-	return @mysql_num_rows($par);
-}
-
-function Yaz($par){
-	return @mysql_fetch_Object($par);
-}
-
-
-?>
+    function Sor($sql){
+        global $Hata;
+        if(isset($sql)){
+            if(Connect()){
+                $sonuc = @mysql_query($sql);
+                $Hata = mysql_error();
+                DisConnect();
+                return $sonuc;
+            }
+        }
+    }
+    
+    function Say($par){
+        return @mysql_num_rows($par);
+    }
+    
+    function Yaz($par){
+        return @mysql_fetch_assoc($par);
+    }
+    
+    function oturum_kontrol($par, $par2){
+        if($par!="" AND $par2!=""){
+            $Kontrol = Sor("SELECT username, password FROM users WHERE username='{$par}' AND password='{$par2}' ");
+            if(Say($Kontrol)>0){
+                $Yaz = Yaz($Kontrol);
+                if($_SESSION["user"]==$Yaz["username"] AND $_SESSION["oturum"]==md5($Yaz["password"].$_SERVER["REMOTE_ADDR"])){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+    }

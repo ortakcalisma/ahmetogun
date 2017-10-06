@@ -60,6 +60,15 @@
 		}
 		
 	}
+	function go($par, $time=0){
+			if($time==0){
+				header("Location: {$par}");
+			}
+			else{
+				header("Refresh: {$time}; url={$par}");
+			}
+		}
+
 
 
 ?>

@@ -63,65 +63,47 @@ ob_start();
 											<?php 
 												require_once '../assets/setting/mysql.php';
 												require_once '../assets/setting/tool.function.php';
-												//Connect();
 												global $Hata;
-												if (isset($_POST["gonderbutton"])){
-													$username = @mysql_real_escape_string($_POST("usertxt"));
-													$password = @mysql_real_escape_string($_POST("passtxt"));
-													
-													
-													$sql = "SELECT username, password FROM website WHERE username='{$username}' AND password='{$password}'";
-													$result = mysqli_query(Connect($baglan,$sql));
-													$row = mysqli_fetch_array($result,MYSQLI_ASSOC);
-      												$active = $row['active'];
-													$count = mysqli_num_rows($result);
-													if($count == 1) {
-														 session_register("username");
-														 $_SESSION['login_user'] = $username;
+											    if(isset($_POST["formGonderBtn"])){
+													$userTxt = @mysql_real_escape_string($_POST("userTxt"));
+													$sifreTxt =@mysql_real_escape_string($_POST("sifreTxt"));
+													if($userTxt=="" || $sifreTxt==""){
+														echo '<div class="alert alert-warning">Boş Alan Bırakmayınız..</div>';
+													}
+													else{
+														$Sor = Sor("SELECT username, password FROM users WHERE username='{$userTxt}' AND password='{$sifreTxt}' ");
+														if(Say($Sor)>0){
+															$Yaz = Yaz($Sor);
+															$userS = sYap(array('user' => $Yaz["username"]));
+															$passS = sYap(array('pass' => $Yaz["password"]));
+															$oturum = sYap(array('oturum' => md5($Yaz["password"].$_SERVER["REMOTE_ADDR"])));
+															if($userS==true AND $passS==true AND $oturum==true){
+																echo '<div class="alert alert-success">Giriş Başarılı</div>';
+																go("index.php", 2);
+															}
+															else{
+																 echo '<div class="alert alert-danger">Oturum Açılamadı !</div>';
+															}
+														}
+														else{
+															echo '<div class="alert alert-danger">Hatalı Bilgiler !</div>';
+														}
 
-														 header("location: index.php");
-													  }else {
-														 $error = "Kullanıcı Adı veya Şifre Hatalı !!";
-													  }
+													}
+
 												}
-
-//													if ($username=="" || $password==""){
-//														echo '<div class="alert alert-warning">Boş Alan Bırakmayınız !!</div>';
-//
-//													}
-//													else{
-//														$sor = Sor("SELECT username, password FROM website WHERE username='{$username}' AND password='{$password}'");
-//														if(Say($sor)>0){		
-//															$Yaz = Yaz($Sor);
-//															$userS = sYap(array('user' => $Yaz["username"]));
-//															$passS = sYap(array('pass' => $Yaz["password"]));
-//															$oturum = sYap(array('' => md5($Yaz["password"].$_SERVER["REMOTE_ADDR"])));
-//															if ($userS==true and $passS== true and $oturum==true){
-//																echo '<div class="alert alert-success">Giriş Başarılı</div>';
-//															}
-//															else{
-//																echo '<div class="alert alert-danger">Oturum Açılamadı !</div>';
-//															}
-//
-//														}
-//													else{
-//															echo '<div class="alert alert-danger">Hatalı Bilgiler</div>';
-//													}
-
-
-//													}
-//												}
+												
 											?>
 		
-											<form method="POST">
+											<form action="" method="post">
 												<div class="form-group">
-													<label class="control-label mb-10" for="usertxt">Kullanıcı Adı</label>
-													<input type="text" class="form-control" name="usertxt" required="" id="usertxt" placeholder="Kullanıcı Adı Giriniz">
+													<label class="control-label mb-10" for="userTxt">Kullanıcı Adı</label>
+													<input type="text" class="form-control" name="userTxt" required="" id="userTxt" placeholder="Kullanıcı Adı Giriniz">
 												</div>
 												<div class="form-group">
-													<label class="pull-left control-label mb-10" for="passtxt">Şifre</label>
+													<label class="pull-left control-label mb-10" for="password">Şifre</label>
 													<div class="clearfix"></div>
-													<input type="password" class="form-control" name="passtxt" required="" id="passtxt" placeholder="Şifreyi Giriniz">
+													<input type="password" class="form-control" name="sifreTxt" required="" id="sifreTxt" placeholder="Şifreyi Giriniz">
 												</div>
 												
 												<div class="form-group">
@@ -129,7 +111,7 @@ ob_start();
 													<div class="clearfix"></div>
 												</div>
 												<div class="form-group text-center">
-													<button type="submit" id="gonderbutton" name="gonderbutton" class="btn btn-info btn-success btn-rounded">Giriş Yap</button>
+													<button type="submit" id="formGonderBtn" name="formGonderBtn" class="btn btn-info btn-success btn-rounded">Giriş</button>>
 												</div>
 											</form>
 										</div>
