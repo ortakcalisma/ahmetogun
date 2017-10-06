@@ -1,3 +1,9 @@
+<?php
+session_start();
+ob_start();
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -6,18 +12,6 @@
 		<title>Web Tasarım Sitesi Giriş Paneli</title>
 		<meta name="description" content="Web Tasarım Sitesi Giriş Paneli" />
 		<meta name="author" content="hencework"/>
-		<?php 
-		require_once '../assets/setting/mysql.php';
-		//Connect();
-		global $Hata;
-		$username = $_POST["username"];
-		$password = $_POST["inputsifre"];
-		if ($username == "")
-		if (isset ($_POST["gonderbutton"])){
-			
-			
-		}
-		?>
 		
 		<!-- Favicon -->
 		<link rel="shortcut icon" href="favicon.ico">
@@ -65,22 +59,59 @@
 											<h3 class="text-center txt-dark mb-10">Admin Panel Girişi</h3>											
 										</div>	
 										<div class="form-wrap">
-											<form action="index.php" method="POST">
+										
+											<?php 
+												require_once '../assets/setting/mysql.php';
+												require_once '../assets/setting/tool.function.php';
+												//Connect();
+												global $Hata;
+												if (isset($_POST["gonderbutton"])){
+													$username = @mysql_real_escape_string(post("usertxt"));
+													$password = @mysql_real_escape_string(post("passtxt"));
+													echo $username;
+													echo $password;
+
+													if ($username=="" || $password==""){
+														echo '<div class="alert alert-warning">Boş Alan Bırakmayınız !!</div>';
+
+													}
+													else{
+														$sor = Sor("SELECT username, password FROM website WHERE username='{$username}' AND password='{$password}'");
+														if(Say($sor)>0){		
+															$Yaz = Yaz($Sor);
+															$userS = sYap(array('user' => $Yaz["username"]));
+															$passS = sYap(array('pass' => $Yaz["password"]));
+															$oturum = sYap(array('' => md5($Yaz["password"].$_SERVER["REMOTE_ADDR"])));
+															if ($userS==true and $passS== true and $oturum==true){
+																echo '<div class="alert alert-success">Giriş Başarılı</div>';
+															}
+															else{
+																echo '<div class="alert alert-danger">Oturum Açılamadı !</div>';
+															}
+
+														}
+													else{
+															echo '<div class="alert alert-danger">Hatalı Bilgiler</div>';
+													}
+
+
+													}
+												}
+											?>
+		
+											<form  method="POST">
 												<div class="form-group">
-													<label class="control-label mb-10" for="username">Kullanıcı Adı</label>
-													<input type="text" class="form-control" required="" id="username" placeholder="Kullanıcı Adı Giriniz">
+													<label class="control-label mb-10" for="usertxt">Kullanıcı Adı</label>
+													<input type="text" class="form-control" name="usertxt" required="" id="usertxt" placeholder="Kullanıcı Adı Giriniz">
 												</div>
 												<div class="form-group">
-													<label class="pull-left control-label mb-10" for="sifretext">Şifre</label>
+													<label class="pull-left control-label mb-10" for="passtxt">Şifre</label>
 													<div class="clearfix"></div>
-													<input type="password" class="form-control" required="" id="inputsifre" placeholder="Şifreyi Giriniz">
+													<input type="password" class="form-control" name="passtxt" required="" id="passtxt" placeholder="Şifreyi Giriniz">
 												</div>
 												
 												<div class="form-group">
-													<div class="checkbox checkbox-primary pr-10 pull-left">
-														<input id="checkbox_2" required="" type="checkbox">
-														<label for="checkbox_2"> Oturumu Açık Tut</label>
-													</div>
+												
 													<div class="clearfix"></div>
 												</div>
 												<div class="form-group text-center">
